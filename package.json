@@ -1,0 +1,18 @@
+{
+  "name": "red-bot-shop-openings",
+  "version": "1.0.1",
+  "description": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`. A simple configuration panel will help setting up the opening times and a custom text for special openings.",
+  "main": "index.js",
+  "author": {
+    "name": "Guido Bellomo",
+    "email": "guido.bellomo@gmail.com",
+    "url": "https://github.com/guidone"
+  },
+  "homepage": "https://github.com/guidone/red-bot-shop-openings",
+  "license": "ISC",
+  "repository": "",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
