@@ -33,7 +33,7 @@ plug('sidebar', null, {
 plug(
   'pages',
   withConfigurationPage(
-    'openings',
+    'shop-openings',
     ConfigurationForm,
     { Legend, title: 'Opening Hours' }
   ),

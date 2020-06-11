@@ -1,507 +1,507 @@
 [
-  {
-      "id": "6ed9e175.dac7b",
-      "type": "subflow",
-      "name": "Opening hours",
-      "info": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`.\nA simple configuration panel will help setting up the opening times and a custom text for special openings.",
-      "category": "RedBot Flows",
-      "in": [
-          {
-              "x": 100,
-              "y": 260,
-              "wires": [
-                  {
-                      "id": "df72dfdc.d285"
-                  }
-              ]
-          }
-      ],
-      "out": [
-          {
-              "x": 2500,
-              "y": 180,
-              "wires": [
-                  {
-                      "id": "7cdddd7e.68b4e4",
-                      "port": 0
-                  },
-                  {
-                      "id": "55a4aec9.5337f",
-                      "port": 0
-                  }
-              ]
-          },
-          {
-              "x": 1220,
-              "y": 640,
-              "wires": [
-                  {
-                      "id": "df72dfdc.d285",
-                      "port": 1
-                  },
-                  {
-                      "id": "f40061cd.c394",
-                      "port": 0
-                  }
-              ]
-          }
-      ],
-      "env": [],
-      "color": "#ff6633",
-      "outputLabels": [
-          "To Sender",
-          "Passthrough"
-      ],
-      "icon": "font-awesome/fa-clock-o"
-  },
-  {
-      "id": "b87c75cd.d6f0a8",
-      "type": "inject",
-      "z": "6ed9e175.dac7b",
-      "name": "",
-      "topic": "",
-      "payload": "",
-      "payloadType": "date",
-      "repeat": "",
-      "crontab": "",
-      "once": true,
-      "onceDelay": 0.1,
-      "x": 170,
-      "y": 520,
-      "wires": [
-          [
-              "7f9e9ca6.bc9b74"
-          ]
-      ]
-  },
-  {
-      "id": "800b09d3.132d38",
-      "type": "mc-configuration",
-      "z": "6ed9e175.dac7b",
-      "namespace": "openings",
-      "debug": true,
-      "x": 200,
-      "y": 820,
-      "wires": [
-          []
-      ]
-  },
-  {
-      "id": "69142aa3.5d8114",
-      "type": "comment",
-      "z": "6ed9e175.dac7b",
-      "name": "On change configuration",
-      "info": "",
-      "x": 190,
-      "y": 780,
-      "wires": []
-  },
-  {
-      "id": "7f9e9ca6.bc9b74",
-      "type": "chatbot-nlpjs-intent",
-      "z": "6ed9e175.dac7b",
-      "intent": "shop.is.open",
-      "language": "en",
-      "utterances": [
-          "is the shop open?",
-          "are you open?",
-          "is it open?",
-          "can i come now?",
-          "is the shop open now?",
-          "are you open now?"
-      ],
-      "outputs": 1,
-      "x": 440,
-      "y": 520,
-      "wires": [
-          [
-              "8b4496f4.7fd1c8"
-          ]
-      ]
-  },
-  {
-      "id": "e0f5a1b6.1e45",
-      "type": "chatbot-nlpjs-train",
-      "z": "6ed9e175.dac7b",
-      "name": "openings",
-      "debug": true,
-      "x": 740,
-      "y": 520,
-      "wires": [
-          []
-      ]
-  },
-  {
-      "id": "2d812166.a726ce",
-      "type": "chatbot-nlpjs",
-      "z": "6ed9e175.dac7b",
-      "name": "openings",
-      "debug": true,
-      "scoreThreshold": "{{global.openings_threshold}}",
-      "x": 480,
-      "y": 260,
-      "wires": [
-          [
-              "997614a8.6c6f78"
-          ]
-      ]
-  },
-  {
-      "id": "997614a8.6c6f78",
-      "type": "chatbot-rules",
-      "z": "6ed9e175.dac7b",
-      "name": "",
-      "rules": [
-          {
-              "type": "isIntentName",
-              "intent": "shop.is.open"
-          },
-          {
-              "type": "isIntentName",
-              "intent": "shop.openings"
-          },
-          {
-              "type": "catchAll"
-          }
-      ],
-      "outputs": 3,
-      "x": 730,
-      "y": 260,
-      "wires": [
-          [
-              "a85c2839.ae3328"
-          ],
-          [
-              "ad1ca611.2a94e8"
-          ],
-          [
-              "f40061cd.c394"
-          ]
-      ]
-  },
-  {
-      "id": "a85c2839.ae3328",
-      "type": "function",
-      "z": "6ed9e175.dac7b",
-      "name": "Is Open",
-      "func": "const chat = msg.chat();\n\nconst tx = global.get('tx');\nconst json = global.get('openings_openings');\nconst label = global.get('openings_labelOpenings');\n\nconst isLowerHour = (current, date) => {\n  return current.getHours() < date.getHours() \n  || (current.getHours() === date.getHours() && current.getMinutes() <= date.getMinutes());         \n};\n\nconst isHigherHour = (current, date) => {\n  return current.getHours() > date.getHours() \n    || (current.getHours() === date.getHours() && current.getMinutes() >= date.getMinutes());         \n};\n\nconst isDayBetween = (current, range) => {\n  const dayOfWeek = current.getDay();\n  switch(range) {\n    case 'su': return dayOfWeek === 0;\n    case 'mo': return dayOfWeek === 1;\n    case 'tu': return dayOfWeek === 2;\n    case 'we': return dayOfWeek === 3;\n    case 'th': return dayOfWeek === 4;\n    case 'fr': return dayOfWeek === 5;\n    case 'sa': return dayOfWeek === 6;\n    case 'mo-fr': return dayOfWeek >= 0 && dayOfWeek <= 4;\n    case 'mo-sa': return dayOfWeek >= 0 && dayOfWeek <= 5;\n    case 'mo-su': return dayOfWeek >= 0 && dayOfWeek <= 6;\n    case 'sa-su': return dayOfWeek >= 5 && dayOfWeek <= 4;\n    default: return false;\n  }      \n};\n\nconst isBetween = (current, item) => {\n  const start = new Date(item.start);\n  const end = new Date(item.end);    \n    \n  return isDayBetween(current, item.range)\n    && isHigherHour(current, start)\n    && isLowerHour(current, end);    \n};\n\n\nconst current = new Date();\nconst isOpen = (json || []).some(range => isBetween(current, range));\n\nnode.send(isOpen ? [msg, null] : [null, msg]);\n\n\n",
-      "outputs": 2,
-      "noerr": 0,
-      "x": 1000,
-      "y": 220,
-      "wires": [
-          [
-              "54ecf74a.9db668"
-          ],
-          [
-              "5b8b68f4.b430d8"
-          ]
-      ]
-  },
-  {
-      "id": "df72dfdc.d285",
-      "type": "chatbot-rules",
-      "z": "6ed9e175.dac7b",
-      "name": "",
-      "rules": [
-          {
-              "type": "messageType",
-              "messageType": "message"
-          },
-          {
-              "type": "catchAll"
-          }
-      ],
-      "outputs": 2,
-      "x": 290,
-      "y": 260,
-      "wires": [
-          [
-              "2d812166.a726ce"
-          ],
-          []
-      ]
-  },
-  {
-      "id": "2e33bab3.0cba26",
-      "type": "comment",
-      "z": "6ed9e175.dac7b",
-      "name": "Do nothing pass thru",
-      "info": "",
-      "x": 1300,
-      "y": 600,
-      "wires": []
-  },
-  {
-      "id": "8b4496f4.7fd1c8",
-      "type": "chatbot-nlpjs-intent",
-      "z": "6ed9e175.dac7b",
-      "intent": "shop.openings",
-      "language": "en",
-      "utterances": [
-          "what are your opening hours?",
-          "when are you open?",
-          "when the shop is open?",
-          "what are your openings?",
-          "can you tell me when is open?",
-          "when i can come to the shop?"
-      ],
-      "outputs": 1,
-      "x": 440,
-      "y": 580,
-      "wires": [
-          [
-              "253ddb55.5c5bb4"
-          ]
-      ]
-  },
-  {
-      "id": "ad1ca611.2a94e8",
-      "type": "function",
-      "z": "6ed9e175.dac7b",
-      "name": "List openings",
-      "func": "const chat = msg.chat();\n\nconst tx = global.get('tx');\nconst json = global.get('openings_openings');\nconst label = global.get('openings_labelOpenings');\n\nconst formatRange = (range, language) => {\n  switch(range) {\n    case 'mo': return tx('openings.monday', language);\n    case 'tu': return tx('openings.tuesday', language);\n    case 'we': return tx('openings.wednesday', language);\n    case 'th': return tx('openings.thursday', language);\n    case 'fr': return tx('openings.friday', language);\n    case 'sa': return tx('openings.saturday', language);\n    case 'su': return tx('openings.sunday', language);\n    case 'mo-fr': return tx('openings.monfri', language);\n    case 'mo-sa': return tx('openings.monsat', language);\n    case 'mo-su': return tx('openings.monsun', language);\n    case 'sa-su': return tx('openings.satsun', language);\n  }    \n}\nconst formatDigits = digits => digits < 10 ? `0${digits}` : digits;\nconst formatHour = d => `${formatDigits(d.getHours())}:${formatDigits(d.getMinutes())}`;\n\nPromise.resolve(chat.get('language'))\n  .then(language => {\n    const today = new Date();\n\n    const message = json.map(item => {\n      const start = new Date(item.start);\n      const end = new Date(item.end);    \n      return `${formatRange(item.range, language)} ${formatHour(start)} - ${formatHour(end)}`;\n    });\n    \n    // allow other messages to pass through\n    msg.message = [tx('openings.openWhen', language), '', ...message].join('\\n');\n    \n    node.send(msg);  \n  });\n\n\n",
-      "outputs": 1,
-      "noerr": 0,
-      "x": 1380,
-      "y": 400,
-      "wires": [
-          [
-              "38da9c3d.cca514"
-          ]
-      ]
-  },
-  {
-      "id": "38da9c3d.cca514",
-      "type": "chatbot-message",
-      "z": "6ed9e175.dac7b",
-      "name": "",
-      "message": [],
-      "x": 1550,
-      "y": 400,
-      "wires": [
-          [
-              "7398e37d.b7364c"
-          ]
-      ]
-  },
-  {
-      "id": "253ddb55.5c5bb4",
-      "type": "chatbot-nlpjs-intent",
-      "z": "6ed9e175.dac7b",
-      "intent": "shop.openings",
-      "language": "it",
-      "utterances": [
-          "quando siete aperti?",
-          "quali sono i vostri orari di apertura?",
-          "quando e' aperto il vostro negozio?",
-          "quando posso venire nel vostro negozio?",
-          "quando e' aperto il negozio?",
-          "quali sono gli orari di apertura?",
-          "orari di apertura?"
-      ],
-      "outputs": 1,
-      "x": 440,
-      "y": 640,
-      "wires": [
-          [
-              "b7715933.7d7e68"
-          ]
-      ]
-  },
-  {
-      "id": "7398e37d.b7364c",
-      "type": "mc-content",
-      "z": "6ed9e175.dac7b",
-      "query": "{{global.openings_content}}",
-      "language": "",
-      "failbackLanguage": "en",
-      "chain": true,
-      "x": 1800,
-      "y": 400,
-      "wires": [
-          [
-              "838d3daa.ccd05"
-          ],
-          []
-      ]
-  },
-  {
-      "id": "838d3daa.ccd05",
-      "type": "chatbot-message",
-      "z": "6ed9e175.dac7b",
-      "name": "",
-      "message": [
-          {
-              "message": "{{payload.body}}"
-          }
-      ],
-      "language": "",
-      "x": 2090,
-      "y": 400,
-      "wires": [
-          [
-              "55a4aec9.5337f"
-          ]
-      ]
-  },
-  {
-      "id": "54ecf74a.9db668",
-      "type": "chatbot-message",
-      "z": "6ed9e175.dac7b",
-      "name": "Yes!",
-      "message": [
-          {
-              "message": "Yes, we're open"
-          },
-          {
-              "message": "Sure we are!"
-          },
-          {
-              "message": "The shop is open"
-          }
-      ],
-      "language": "en",
-      "x": 1180,
-      "y": 180,
-      "wires": [
-          [
-              "7cdddd7e.68b4e4"
-          ]
-      ]
-  },
-  {
-      "id": "75605144.8e7fb",
-      "type": "chatbot-message",
-      "z": "6ed9e175.dac7b",
-      "name": "No",
-      "message": [
-          {
-              "message": "No, we're sorry"
-          },
-          {
-              "message": "No, the shop is close right now"
-          }
-      ],
-      "language": "en",
-      "x": 1320,
-      "y": 260,
-      "wires": [
-          [
-              "ad1ca611.2a94e8"
-          ]
-      ]
-  },
-  {
-      "id": "5b8b68f4.b430d8",
-      "type": "chatbot-message",
-      "z": "6ed9e175.dac7b",
-      "name": "No",
-      "message": [
-          {
-              "message": "Mi spiace, siamo chiusi"
-          },
-          {
-              "message": "No, in questo momento il negozio e' chiuso"
-          }
-      ],
-      "language": "it",
-      "x": 1170,
-      "y": 260,
-      "wires": [
-          [
-              "75605144.8e7fb"
-          ]
-      ]
-  },
-  {
-      "id": "b7715933.7d7e68",
-      "type": "chatbot-nlpjs-intent",
-      "z": "6ed9e175.dac7b",
-      "intent": "shop.is.open",
-      "language": "it",
-      "utterances": [
-          "siete aperti?",
-          "il negozio e' aperto?",
-          "siete aperti ora?",
-          "siete aperti adesso?",
-          "il negozio e' aperto adesso?",
-          "adesso il negozio e' aperto?"
-      ],
-      "outputs": 1,
-      "x": 440,
-      "y": 700,
-      "wires": [
-          [
-              "e0f5a1b6.1e45"
-          ]
-      ]
-  },
-  {
-      "id": "adeae082.73634",
-      "type": "comment",
-      "z": "6ed9e175.dac7b",
-      "name": "initialize model",
-      "info": "",
-      "x": 160,
-      "y": 480,
-      "wires": []
-  },
-  {
-      "id": "7cdddd7e.68b4e4",
-      "type": "chatbot-message",
-      "z": "6ed9e175.dac7b",
-      "name": "Si!",
-      "message": [
-          {
-              "message": "Si, siamo aperti"
-          },
-          {
-              "message": "Certo, siamo aperti!"
-          },
-          {
-              "message": "Il negozio e' aperto"
-          }
-      ],
-      "language": "it",
-      "x": 1350,
-      "y": 180,
-      "wires": [
-          []
-      ]
-  },
-  {
-      "id": "f40061cd.c394",
-      "type": "chatbot-pop-message",
-      "z": "6ed9e175.dac7b",
-      "x": 1060,
-      "y": 520,
-      "wires": [
-          []
-      ]
-  },
-  {
-      "id": "cde8311e.6efa",
-      "type": "comment",
-      "z": "6ed9e175.dac7b",
-      "name": "Pop previous message overwritten by intent",
-      "info": "",
-      "x": 1150,
-      "y": 480,
-      "wires": []
-  },
-  {
-      "id": "55a4aec9.5337f",
-      "type": "function",
-      "z": "6ed9e175.dac7b",
-      "name": "Add previous, if any",
-      "func": "console.log('REEEEEEE', msg)\n\n// if there are some message in previous, then enque\nif (msg.previous != null && msg.previous.length != null) {\n  msg.payload = [...msg.previous, msg.payload]; \n  return msg;\n} else {\n  return msg;    \n}\n\n",
-      "outputs": 1,
-      "noerr": 0,
-      "x": 2300,
-      "y": 400,
-      "wires": [
-          []
-      ]
-  }
+    {
+        "id": "6ed9e175.dac7b",
+        "type": "subflow",
+        "name": "Opening hours",
+        "info": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`.\nA simple configuration panel will help setting up the opening times and a custom text for special openings.",
+        "category": "RedBot Flows",
+        "in": [
+            {
+                "x": 100,
+                "y": 260,
+                "wires": [
+                    {
+                        "id": "df72dfdc.d285"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 2500,
+                "y": 180,
+                "wires": [
+                    {
+                        "id": "7cdddd7e.68b4e4",
+                        "port": 0
+                    },
+                    {
+                        "id": "55a4aec9.5337f",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1220,
+                "y": 640,
+                "wires": [
+                    {
+                        "id": "df72dfdc.d285",
+                        "port": 1
+                    },
+                    {
+                        "id": "f40061cd.c394",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "color": "#ff6633",
+        "outputLabels": [
+            "To Sender",
+            "Passthrough"
+        ],
+        "icon": "font-awesome/fa-clock-o"
+    },
+    {
+        "id": "b87c75cd.d6f0a8",
+        "type": "inject",
+        "z": "6ed9e175.dac7b",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 170,
+        "y": 520,
+        "wires": [
+            [
+                "7f9e9ca6.bc9b74"
+            ]
+        ]
+    },
+    {
+        "id": "800b09d3.132d38",
+        "type": "mc-configuration",
+        "z": "6ed9e175.dac7b",
+        "namespace": "shop-openings",
+        "debug": true,
+        "x": 220,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "69142aa3.5d8114",
+        "type": "comment",
+        "z": "6ed9e175.dac7b",
+        "name": "On change configuration",
+        "info": "",
+        "x": 190,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "7f9e9ca6.bc9b74",
+        "type": "chatbot-nlpjs-intent",
+        "z": "6ed9e175.dac7b",
+        "intent": "shop.is.open",
+        "language": "en",
+        "utterances": [
+            "is the shop open?",
+            "are you open?",
+            "is it open?",
+            "can i come now?",
+            "is the shop open now?",
+            "are you open now?"
+        ],
+        "outputs": 1,
+        "x": 440,
+        "y": 520,
+        "wires": [
+            [
+                "8b4496f4.7fd1c8"
+            ]
+        ]
+    },
+    {
+        "id": "e0f5a1b6.1e45",
+        "type": "chatbot-nlpjs-train",
+        "z": "6ed9e175.dac7b",
+        "name": "openings",
+        "debug": true,
+        "x": 740,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2d812166.a726ce",
+        "type": "chatbot-nlpjs",
+        "z": "6ed9e175.dac7b",
+        "name": "openings",
+        "debug": true,
+        "scoreThreshold": "{{global.openings_threshold}}",
+        "x": 480,
+        "y": 260,
+        "wires": [
+            [
+                "997614a8.6c6f78"
+            ]
+        ]
+    },
+    {
+        "id": "997614a8.6c6f78",
+        "type": "chatbot-rules",
+        "z": "6ed9e175.dac7b",
+        "name": "",
+        "rules": [
+            {
+                "type": "isIntentName",
+                "intent": "shop.is.open"
+            },
+            {
+                "type": "isIntentName",
+                "intent": "shop.openings"
+            },
+            {
+                "type": "catchAll"
+            }
+        ],
+        "outputs": 3,
+        "x": 730,
+        "y": 260,
+        "wires": [
+            [
+                "a85c2839.ae3328"
+            ],
+            [
+                "ad1ca611.2a94e8"
+            ],
+            [
+                "f40061cd.c394"
+            ]
+        ]
+    },
+    {
+        "id": "a85c2839.ae3328",
+        "type": "function",
+        "z": "6ed9e175.dac7b",
+        "name": "Is Open",
+        "func": "const chat = msg.chat();\n\nconst tx = global.get('tx');\nconst json = global.get('shop-openings_openings');\n\nconst isLowerHour = (current, date) => {\n  return current.getHours() < date.getHours() \n  || (current.getHours() === date.getHours() && current.getMinutes() <= date.getMinutes());         \n};\n\nconst isHigherHour = (current, date) => {\n  return current.getHours() > date.getHours() \n    || (current.getHours() === date.getHours() && current.getMinutes() >= date.getMinutes());         \n};\n\nconst isDayBetween = (current, range) => {\n  const dayOfWeek = current.getDay();\n  switch(range) {\n    case 'su': return dayOfWeek === 0;\n    case 'mo': return dayOfWeek === 1;\n    case 'tu': return dayOfWeek === 2;\n    case 'we': return dayOfWeek === 3;\n    case 'th': return dayOfWeek === 4;\n    case 'fr': return dayOfWeek === 5;\n    case 'sa': return dayOfWeek === 6;\n    case 'mo-fr': return dayOfWeek >= 0 && dayOfWeek <= 4;\n    case 'mo-sa': return dayOfWeek >= 0 && dayOfWeek <= 5;\n    case 'mo-su': return dayOfWeek >= 0 && dayOfWeek <= 6;\n    case 'sa-su': return dayOfWeek >= 5 && dayOfWeek <= 4;\n    default: return false;\n  }      \n};\n\nconst isBetween = (current, item) => {\n  const start = new Date(item.start);\n  const end = new Date(item.end);    \n    \n  return isDayBetween(current, item.range)\n    && isHigherHour(current, start)\n    && isLowerHour(current, end);    \n};\n\n\nconst current = new Date();\nconst isOpen = (json || []).some(range => isBetween(current, range));\n\nnode.send(isOpen ? [msg, null] : [null, msg]);\n\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 1000,
+        "y": 220,
+        "wires": [
+            [
+                "54ecf74a.9db668"
+            ],
+            [
+                "5b8b68f4.b430d8"
+            ]
+        ]
+    },
+    {
+        "id": "df72dfdc.d285",
+        "type": "chatbot-rules",
+        "z": "6ed9e175.dac7b",
+        "name": "",
+        "rules": [
+            {
+                "type": "messageType",
+                "messageType": "message"
+            },
+            {
+                "type": "catchAll"
+            }
+        ],
+        "outputs": 2,
+        "x": 290,
+        "y": 260,
+        "wires": [
+            [
+                "2d812166.a726ce"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "2e33bab3.0cba26",
+        "type": "comment",
+        "z": "6ed9e175.dac7b",
+        "name": "Do nothing pass thru",
+        "info": "",
+        "x": 1300,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "8b4496f4.7fd1c8",
+        "type": "chatbot-nlpjs-intent",
+        "z": "6ed9e175.dac7b",
+        "intent": "shop.openings",
+        "language": "en",
+        "utterances": [
+            "what are your opening hours?",
+            "when are you open?",
+            "when the shop is open?",
+            "what are your openings?",
+            "can you tell me when is open?",
+            "when i can come to the shop?"
+        ],
+        "outputs": 1,
+        "x": 440,
+        "y": 580,
+        "wires": [
+            [
+                "253ddb55.5c5bb4"
+            ]
+        ]
+    },
+    {
+        "id": "ad1ca611.2a94e8",
+        "type": "function",
+        "z": "6ed9e175.dac7b",
+        "name": "List openings",
+        "func": "const chat = msg.chat();\n\nconst tx = global.get('tx');\nconst json = global.get('shop-openings_openings');\n\nconst formatRange = (range, language) => {\n  switch(range) {\n    case 'mo': return tx('openings.monday', language);\n    case 'tu': return tx('openings.tuesday', language);\n    case 'we': return tx('openings.wednesday', language);\n    case 'th': return tx('openings.thursday', language);\n    case 'fr': return tx('openings.friday', language);\n    case 'sa': return tx('openings.saturday', language);\n    case 'su': return tx('openings.sunday', language);\n    case 'mo-fr': return tx('openings.monfri', language);\n    case 'mo-sa': return tx('openings.monsat', language);\n    case 'mo-su': return tx('openings.monsun', language);\n    case 'sa-su': return tx('openings.satsun', language);\n  }    \n}\nconst formatDigits = digits => digits < 10 ? `0${digits}` : digits;\nconst formatHour = d => `${formatDigits(d.getHours())}:${formatDigits(d.getMinutes())}`;\n\nPromise.resolve(chat.get('language'))\n  .then(language => {\n    const today = new Date();\n\n    const message = json.map(item => {\n      const start = new Date(item.start);\n      const end = new Date(item.end);    \n      return `${formatRange(item.range, language)} ${formatHour(start)} - ${formatHour(end)}`;\n    });\n    \n    // allow other messages to pass through\n    msg.message = [tx('openings.openWhen', language), '', ...message].join('\\n');\n    \n    node.send(msg);  \n  });\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1380,
+        "y": 400,
+        "wires": [
+            [
+                "38da9c3d.cca514"
+            ]
+        ]
+    },
+    {
+        "id": "38da9c3d.cca514",
+        "type": "chatbot-message",
+        "z": "6ed9e175.dac7b",
+        "name": "",
+        "message": [],
+        "x": 1550,
+        "y": 400,
+        "wires": [
+            [
+                "7398e37d.b7364c"
+            ]
+        ]
+    },
+    {
+        "id": "253ddb55.5c5bb4",
+        "type": "chatbot-nlpjs-intent",
+        "z": "6ed9e175.dac7b",
+        "intent": "shop.openings",
+        "language": "it",
+        "utterances": [
+            "quando siete aperti?",
+            "quali sono i vostri orari di apertura?",
+            "quando e' aperto il vostro negozio?",
+            "quando posso venire nel vostro negozio?",
+            "quando e' aperto il negozio?",
+            "quali sono gli orari di apertura?",
+            "orari di apertura?"
+        ],
+        "outputs": 1,
+        "x": 440,
+        "y": 640,
+        "wires": [
+            [
+                "b7715933.7d7e68"
+            ]
+        ]
+    },
+    {
+        "id": "7398e37d.b7364c",
+        "type": "mc-content",
+        "z": "6ed9e175.dac7b",
+        "query": "{{global.openings_content}}",
+        "language": "",
+        "failbackLanguage": "en",
+        "chain": true,
+        "x": 1800,
+        "y": 400,
+        "wires": [
+            [
+                "838d3daa.ccd05"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "838d3daa.ccd05",
+        "type": "chatbot-message",
+        "z": "6ed9e175.dac7b",
+        "name": "",
+        "message": [
+            {
+                "message": "{{payload.body}}"
+            }
+        ],
+        "language": "",
+        "x": 2090,
+        "y": 400,
+        "wires": [
+            [
+                "55a4aec9.5337f"
+            ]
+        ]
+    },
+    {
+        "id": "54ecf74a.9db668",
+        "type": "chatbot-message",
+        "z": "6ed9e175.dac7b",
+        "name": "Yes!",
+        "message": [
+            {
+                "message": "Yes, we're open"
+            },
+            {
+                "message": "Sure we are!"
+            },
+            {
+                "message": "The shop is open"
+            }
+        ],
+        "language": "en",
+        "x": 1180,
+        "y": 180,
+        "wires": [
+            [
+                "7cdddd7e.68b4e4"
+            ]
+        ]
+    },
+    {
+        "id": "75605144.8e7fb",
+        "type": "chatbot-message",
+        "z": "6ed9e175.dac7b",
+        "name": "No",
+        "message": [
+            {
+                "message": "No, we're sorry"
+            },
+            {
+                "message": "No, the shop is close right now"
+            }
+        ],
+        "language": "en",
+        "x": 1320,
+        "y": 260,
+        "wires": [
+            [
+                "ad1ca611.2a94e8"
+            ]
+        ]
+    },
+    {
+        "id": "5b8b68f4.b430d8",
+        "type": "chatbot-message",
+        "z": "6ed9e175.dac7b",
+        "name": "No",
+        "message": [
+            {
+                "message": "Mi spiace, siamo chiusi"
+            },
+            {
+                "message": "No, in questo momento il negozio e' chiuso"
+            }
+        ],
+        "language": "it",
+        "x": 1170,
+        "y": 260,
+        "wires": [
+            [
+                "75605144.8e7fb"
+            ]
+        ]
+    },
+    {
+        "id": "b7715933.7d7e68",
+        "type": "chatbot-nlpjs-intent",
+        "z": "6ed9e175.dac7b",
+        "intent": "shop.is.open",
+        "language": "it",
+        "utterances": [
+            "siete aperti?",
+            "il negozio e' aperto?",
+            "siete aperti ora?",
+            "siete aperti adesso?",
+            "il negozio e' aperto adesso?",
+            "adesso il negozio e' aperto?"
+        ],
+        "outputs": 1,
+        "x": 440,
+        "y": 700,
+        "wires": [
+            [
+                "e0f5a1b6.1e45"
+            ]
+        ]
+    },
+    {
+        "id": "adeae082.73634",
+        "type": "comment",
+        "z": "6ed9e175.dac7b",
+        "name": "initialize model",
+        "info": "",
+        "x": 160,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "7cdddd7e.68b4e4",
+        "type": "chatbot-message",
+        "z": "6ed9e175.dac7b",
+        "name": "Si!",
+        "message": [
+            {
+                "message": "Si, siamo aperti"
+            },
+            {
+                "message": "Certo, siamo aperti!"
+            },
+            {
+                "message": "Il negozio e' aperto"
+            }
+        ],
+        "language": "it",
+        "x": 1350,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f40061cd.c394",
+        "type": "chatbot-pop-message",
+        "z": "6ed9e175.dac7b",
+        "x": 1060,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cde8311e.6efa",
+        "type": "comment",
+        "z": "6ed9e175.dac7b",
+        "name": "Pop previous message overwritten by intent",
+        "info": "",
+        "x": 1150,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "55a4aec9.5337f",
+        "type": "function",
+        "z": "6ed9e175.dac7b",
+        "name": "Add previous, if any",
+        "func": "console.log('REEEEEEE', msg)\n\n// if there are some message in previous, then enque\nif (msg.previous != null && msg.previous.length != null) {\n  msg.payload = [...msg.previous, msg.payload]; \n  return msg;\n} else {\n  return msg;    \n}\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 2300,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    }
 ]
