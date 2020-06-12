@@ -3,7 +3,7 @@
         "id": "6ed9e175.dac7b",
         "type": "subflow",
         "name": "Opening hours",
-        "info": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`.\nA simple configuration panel will help setting up the opening times and a custom text for special openings.",
+        "info": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`.\n\nA simple configuration panel will help setting up the opening times and a custom text for special openings.\n\n**Version:** _1.0.1_\n\n**URL:** [GitHub](https://github.com/guidone/red-bot-shop-openings) ",
         "category": "RedBot Flows",
         "in": [
             {
