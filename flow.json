@@ -3,7 +3,7 @@
         "id": "6ed9e175.dac7b",
         "type": "subflow",
         "name": "Opening hours",
-        "info": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`.\n\nA simple configuration panel will help setting up the opening times and a custom text for special openings.\n\n**Version:** _1.0.1_\n\n**URL:** [GitHub](https://github.com/guidone/red-bot-shop-openings) ",
+        "info": "Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`.\n\nA simple configuration panel will help setting up the opening times and a custom text for special openings.\n\n**Version:** _1.0.3_\n\n**URL:** [GitHub](https://github.com/guidone/red-bot-shop-openings) ",
         "category": "RedBot Flows",
         "in": [
             {
@@ -28,6 +28,10 @@
                     {
                         "id": "55a4aec9.5337f",
                         "port": 0
+                    },
+                    {
+                        "id": "7398e37d.b7364c",
+                        "port": 1
                     }
                 ]
             },
@@ -137,7 +141,7 @@
         "z": "6ed9e175.dac7b",
         "name": "openings",
         "debug": true,
-        "scoreThreshold": "{{global.openings_threshold}}",
+        "scoreThreshold": "{{global.shop-openings_threshold}}",
         "x": 480,
         "y": 260,
         "wires": [
@@ -313,11 +317,11 @@
         "id": "7398e37d.b7364c",
         "type": "mc-content",
         "z": "6ed9e175.dac7b",
-        "query": "{{global.openings_content}}",
+        "query": "{{global.shop-openings_content}}",
         "language": "",
         "failbackLanguage": "en",
         "chain": true,
-        "x": 1800,
+        "x": 1820,
         "y": 400,
         "wires": [
             [
