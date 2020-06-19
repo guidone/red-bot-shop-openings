@@ -1,7 +1,7 @@
 /*!
  * Name: shop-openings
  * Id: shop-openings
- * Version: 1.0.2
+ * Version: 1.0.3
  * Description: Handle simple answers for shops, offices, etc like `are you open?`, `what are the opening times?`. A simple configuration panel will help setting up the opening times and a custom text for special openings.
  * Author: Guido Bellomo (https://github.com/guidone)
  * Repository: https://github.com/guidone/red-bot-shop-openings
